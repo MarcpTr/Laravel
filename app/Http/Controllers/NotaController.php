@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use Illuminate\Http\Request;
 use App\Models\Nota;
@@ -17,7 +18,7 @@ class NotaController extends Controller
     }
 
     public function store(Request $request) {
-        $request->validate([
+        $request->validate([ // Si falla redirige al mismo formulario
             'titulo' => 'required',
             'contenido' => 'required',
         ]);
@@ -27,8 +28,12 @@ class NotaController extends Controller
     }
 
     public function show($id) {
-        $nota = Nota::findOrFail($id);
-        return view('notas.show', compact('nota'));
+        try {
+            $nota = Nota::findOrFail($id);
+            return view('notas.show', compact('nota'));
+        } catch (ModelNotFoundException $e) {
+            return response()->view('errors.nota-no-encontrada', [], 404);
+        };
     }
 
     public function update(Request $request, $id) {
